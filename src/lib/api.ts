@@ -1,3 +1,5 @@
+import { log } from 'node:util';
+
 export interface SummaryStats {
   promotions: number;
   categories: number;
@@ -96,5 +98,38 @@ export const getPromotions = async (
   params: Record<string, string> = {},
   init?: RequestInit
 ) => {
-  return sendRequest<Promotions[]>(buildUrl('promotions'), init);
+  if (params.companyId) {
+    return sendRequest<Promotions[]>(`${buildUrl('promotions')}?${stringifyQueryParams(params)}`, init);
+  } else {
+    return sendRequest<Promotions[]>(buildUrl('promotions'), init);
+  }
+};
+
+export const createCompany = async (
+  data: Omit<Company, 'id' | 'hasPromotions'>,
+  init?: RequestInit
+) => {
+  return sendRequest<Company>(buildUrl('companies'), {
+    ...init,
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: {
+      ...(init && init.headers),
+      'content-type': 'application/json'
+    }
+  });
+};
+
+export const createPromotion = async (
+  data: Omit<Promotions, 'id'>,
+  init?: RequestInit
+) => {
+  return sendRequest<Promotions>(buildUrl('promotions'), {
+    method: 'POST',
+    body: JSON.stringify(data),
+    headers: {
+      ...(init && init.headers),
+      'content-type': 'application/json'
+    }
+  });
 };
